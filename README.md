@@ -1,39 +1,20 @@
-# Variant Search Coding Assignment
+# Variant Search Distributed Systems Assignment
 
 ## Assignment
 
-Create a web application that allows a user to search for genomic variants by gene name and display the results in a tabular view.
+Treating `data/variants.tsv.zip` as source data:
+1. Write a `Kafka` producer which publishes records onto a `Kafka` topic
+2. Come with a strategy to populate published records into an `Elasticsearch` index
+3. Come with a strategy to populate published records into a `postgres` db table [Optional]
 
-## Features
+We're trying to mimic a 1 source -> 2 sink scenario, but you can choose to treat #3 as optional. 
+Please craft solutions prioritizing maintainability and best practices.           
 
-1. Allow the user to enter a gene name to search for variants in that gene. Display the results in a table that shows various attributes associated with each genomic variant.
+## Bootstrap
 
-2. Provide an auto-suggest feature for entering the gene name.
-
-3. Provide two RESTful endpoints supporting the functionality listed in steps 1 and 2.
-
-## Datasource
-
-A zipped TSV file of variants is available in /data/variants.tsv.zip. Each row in the TSV file represents a genomic variant and contains a Gene column with the gene name. A variant will belong to one and only one gene, but multiple variants may belong to the same gene.
+- A `docker-compose` setup is provided a starting point, which sets up `Kafka`, `Zookeeper`, `Elasticsearch`, `Kibana` & `Postgres`
+- Feel free to use a more compact setup which reduces # of individual pieces (eg: `lenses.io`)  
 
 ## Implementation
 
-If you are comfortable with Python and/or React, please use these technologies for your app. You may use any additional frameworks, languages, databases, libraries, etc. that you find appropriate.
-
-Our expectation is you will be writing some server code, client code, and applying some basic styling to create a working web application. The application should include unit tests.
-
-Here’s an example of how you might group and display the information:
-
-![variants table example](./example_table.png)
-
-## Submitting Your Solution
-
-Please clone this repository and upload an archive to Greenhouse, or upload your repository to GitHub and send us a link. Update this README to include instructions on how to install, test, and run your application. Bonus: Deploy it and include the URL here.
-
-As part of the review process, we may comment on or ask questions about specific parts of the code.
-
-Please return your solution within 1 week. This is not an expectation of the time required to complete the assignment. Rather, it’s meant to provide buffer for busy schedules.
-
-## Questions
-
-Please ask if any part of the assignment is unclear. Communicate with us as you would with your project team at work.
+`Python` or a `JVM` language (`Kotlin`, `Scala`, `Java`) is preferred, but feel free to employ any programming language  
