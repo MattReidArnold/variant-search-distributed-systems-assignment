@@ -37,7 +37,7 @@ func Read(filename string, rowCallback RowCallback, fileCallback FileCallback) e
 	fmt.Printf("Processing file with headers: %s\n", headerRow)
 	rowsRead := 1
 
-	for i := 0; i < 20; i++ {
+	for {
 		row, err := r.Read()
 		if err == io.EOF {
 			break
