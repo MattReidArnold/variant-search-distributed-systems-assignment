@@ -14,7 +14,7 @@ Please craft solutions prioritizing maintainability and best practices.
 ## Bootstrap
 
 - A `docker-compose` setup is provided as a starting point, which sets up `Kafka`, `Zookeeper`, `Elasticsearch`, `Kibana` & `Postgres`
-- Feel free to use a more compact setup which reduces # of individual pieces (eg: `lenses.io`)  
+- Feel free to use a more compact setup which reduces # of individual pieces (eg: `lenses.io`)
 
 ## Implementation
 
@@ -44,6 +44,17 @@ docker-compose up -d
 
 ```
 make connectors
+```
+
+- verify results are showing up in postgres
+
+```
+# Open a SQL console in the postgres container
+make psql
+```
+
+```
+select * from variants limit 10;
 ```
 
 - verify results are showing up in elastic search
