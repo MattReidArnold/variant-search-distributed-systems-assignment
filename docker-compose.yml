@@ -92,7 +92,6 @@ services:
     volumes:
       - ./tmp/filesink:/tmp/filesink
       - ./tmp/jars:/etc/kafka-connect/jars
-
     environment:
       CONNECT_BOOTSTRAP_SERVERS: 'kafka:29092'
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
@@ -105,17 +104,31 @@ services:
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-      # CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
       CONNECT_INTERNAL_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
       CONNECT_INTERNAL_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
-      # CLASSPATH required due to CC-2422
-      # CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-6.0.0.jar
-      # CONNECT_PRODUCER_INTERCEPTOR_CLASSES: 'io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor'
-      # CONNECT_CONSUMER_INTERCEPTOR_CLASSES: 'io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor'
       CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/jars'
-      # CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
+      CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
       CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+
+  variants-svc:
+    build:
+      context: ./variants_svc
+      dockerfile: ./dev/Dockerfile
+    hostname: variants-svc
+    container_name: variants-svc
+    depends_on:
+      - kafka
+      - schema-registry
+    volumes:
+      - ./variants_svc:/app
+    working_dir: /app
+    environment:
+      KAFKA_BROKER: 'kafka:29092'
+      SCHEMA_REGISTRY: http://schema-registry:8081
+      VARIANTS_CDC_TOPIC: 'variants'
+      VARIANTS_DATA_FILE: 'data/variants-new.tsv'
+    command: sh -c 'go get && go run main.go'
