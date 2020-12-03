@@ -40,7 +40,7 @@ make plugins
 docker-compose up -d
 ```
 
-- configure kafka connect connectors
+- configure kafka connect connectors (after connect container has had time to initialize)
 
 ```
 make connectors

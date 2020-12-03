@@ -1,13 +1,14 @@
-.PHONY: list_topics connectors consumer connect_plugins data
+.PHONY: list_topics connectors consumer plugins data
 
 # Prepare tsv for consumption
 data:
 	unzip ./data/variants-fixed.tsv.zip -d ./variants_svc/data
 
 # Install kafka connect plugins
-connect_plugins:
+plugins:
+	mkdir -p ./tmp/jars
 	tar -xvf ./plugins/confluentinc-kafka-connect-elasticsearch-10.0.2.zip -C ./tmp/jars 
-	tar -xvf ./plugins/jcustenborder-kafka-connect-spooldir-2.0.46.zip -C ./tmp/jars 
+	tar -xvf ./plugins/confluentinc-kafka-connect-jdbc-10.0.1.zip -C ./tmp/jars 
 
 # Delete and recreate kafka connect connectors 
 connectors:
