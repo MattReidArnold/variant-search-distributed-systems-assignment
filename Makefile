@@ -1,3 +1,5 @@
+.PHONY: list_topics drivers connectors consumer connect_plugins data
+
 list_topics:
 	docker-compose run --rm kafka kafka-topics --describe --zookeeper zookeeper:2181
 
@@ -14,3 +16,6 @@ consumer:
 connect_plugins:
 	tar -xvf ./plugins/confluentinc-kafka-connect-elasticsearch-10.0.2.zip -C ./tmp/jars 
 	tar -xvf ./plugins/jcustenborder-kafka-connect-spooldir-2.0.46.zip -C ./tmp/jars 
+
+data:
+	unzip ./data/variants-fixed.tsv.zip -d ./variants_svc/data

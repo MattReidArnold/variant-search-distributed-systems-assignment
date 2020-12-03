@@ -130,5 +130,5 @@ services:
       KAFKA_BROKER: 'kafka:29092'
       SCHEMA_REGISTRY: http://schema-registry:8081
       VARIANTS_CDC_TOPIC: 'variants'
-      VARIANTS_DATA_FILE: 'data/variants-new.tsv'
+      VARIANTS_DATA_FILE: 'data/variants-fixed.tsv'
     command: sh -c 'go get && go run main.go'
