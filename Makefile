@@ -26,4 +26,8 @@ list_topics:
 consumer:
 	docker-compose exec schema-registry kafka-avro-console-consumer --from-beginning --bootstrap-server kafka:29092 --topic variants 
 
+# Open SQL consonle on postgres container
+psql:
+	docker-compose exec postgres psql -U admin variant-search
+ 
 
