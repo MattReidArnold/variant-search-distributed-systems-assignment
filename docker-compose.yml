@@ -1,4 +1,4 @@
-version: "3.5"
+version: '3.5'
 
 services:
   # Install postgres and setup the tracking database.
@@ -17,26 +17,26 @@ services:
     container_name: elasticsearch
     restart: unless-stopped
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - '9200:9200'
+      - '9300:9300'
     environment:
       cluster.name: docker-es-cluster
       discovery.type: single-node
-      bootstrap.memory_lock: "true"
-      ES_JAVA_OPTS: "-Xms512m -Xmx1024m"
+      bootstrap.memory_lock: 'true'
+      ES_JAVA_OPTS: '-Xms512m -Xmx1024m'
     ulimits:
       memlock:
         soft: -1
         hard: -1
     healthcheck:
-      test: "curl -f http://localhost:9200 || exit 1"
+      test: 'curl -f http://localhost:9200 || exit 1'
       start_period: 30s
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.9.3
     container_name: kibana
     ports:
-      - "5601:5601"
+      - '5601:5601'
     depends_on:
       - elasticsearch
     environment:
@@ -66,3 +66,70 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:6.0.0
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - kafka
+    ports:
+      - '8081:8081'
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+
+  connect:
+    image: confluentinc/cp-kafka-connect:latest
+    hostname: connect
+    container_name: connect
+    depends_on:
+      - kafka
+      - schema-registry
+    ports:
+      - '8083:8083'
+    volumes:
+      - ./tmp/filesink:/tmp/filesink
+      - ./tmp/jars:/etc/kafka-connect/jars
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: 'kafka:29092'
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: compose-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONNECT_INTERNAL_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+      CONNECT_INTERNAL_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+      CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/jars'
+      CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+
+  variants-svc:
+    build:
+      context: ./variants_svc
+      dockerfile: ./dev/Dockerfile
+    hostname: variants-svc
+    container_name: variants-svc
+    depends_on:
+      - kafka
+      - schema-registry
+      - connect
+    volumes:
+      - ./variants_svc:/app
+    working_dir: /app
+    environment:
+      KAFKA_BROKER: 'kafka:29092'
+      SCHEMA_REGISTRY: http://schema-registry:8081
+      VARIANTS_CDC_TOPIC: 'variants'
+      VARIANTS_DATA_FILE: 'data/variants-fixed.tsv'
+    command: sh -c 'go get && go run main.go'
