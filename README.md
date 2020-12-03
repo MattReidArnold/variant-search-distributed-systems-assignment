@@ -34,7 +34,7 @@ make data
 make plugins
 ```
 
-- Spin up env (golang conusmer will process tsv then spin down)
+- Spin up env (golang conusmer sometimes spins up before kafka is ready. Might need to run multiple times.)
 
 ```
 docker-compose up -d
